@@ -23,9 +23,22 @@ __all__ = ['single', 'complete', 'average', 'weighted', 'ward', 'centroid', 'med
 __version_info__ = ('1', '2', '6')
 __version__ = '.'.join(__version_info__)
 
-from numpy import double, empty, array, ndarray, var, cov, dot, expand_dims, \
-    ceil, sqrt
+from numpy import (
+    array,
+    ceil,
+    cov,
+    dot,
+    double,
+    empty,
+    expand_dims,
+    int32,
+    ndarray,
+    ones,
+    sqrt,
+    var,
+)
 from numpy.linalg import inv
+
 try:
     from scipy.spatial.distance import pdist
 except ImportError:
@@ -34,7 +47,8 @@ except ImportError:
                           'vector data since the function '
                           'scipy.spatial.distance.pdist could not be  '
                           'imported.')
-from _fastcluster import linkage_wrap, linkage_vector_wrap
+from _fastcluster import linkage_vector_wrap, linkage_wrap
+
 
 def single(D):
     '''Single linkage clustering (alias). See the help on the “linkage”
@@ -80,7 +94,7 @@ mthidx = {'single'   : 0,
           'centroid' : 5,
           'median'   : 6 }
 
-def linkage(X, method='single', metric='euclidean', preserve_input=True):
+def linkage(X, method='single', metric='euclidean', preserve_input=True, members=None):
     r'''Hierarchical, agglomerative clustering on a dissimilarity matrix or on
 Euclidean data.
 
@@ -242,9 +256,11 @@ and simply ignores the mask.'''
         N = len(X)
         X = pdist(X, metric=metric)
         X = array(X, dtype=double, copy=False, order='C', subok=True)
+    members = ones(N, dtype=int32) if members is None else array(members, dtype=int32, copy=True, subok=True)
+    assert members.shape == (N,)
     Z = empty((N-1,4))
     if N > 1:
-        linkage_wrap(N, X, Z, mthidx[method])
+        linkage_wrap(N, X, Z, mthidx[method], members)
     return Z
 
 # This dictionary must agree with the enum metric_codes in fastcluster_python.cpp.

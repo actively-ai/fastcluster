@@ -240,7 +240,7 @@ class GIL_release
 */
 
 static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
-  PyArrayObject * D, * Z;
+  PyArrayObject * D, * Z, * members_;
   long int N_ = 0;
   unsigned char method;
 
@@ -250,11 +250,12 @@ static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif
     // Parse the input arguments
-    if (!PyArg_ParseTuple(args, "lO!O!b",
+    if (!PyArg_ParseTuple(args, "lO!O!bO!",
                           &N_,                // signed long integer
                           &PyArray_Type, &D, // NumPy array
                           &PyArray_Type, &Z, // NumPy array
-                          &method)) {        // unsigned char
+                          &method,           // unsigned char
+                          &PyArray_Type, &members_)) {  // NumPy array     
       return NULL; // Error if the arguments have the wrong type.
     }
 #if HAVE_DIAGNOSTIC
@@ -294,14 +295,7 @@ static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
 
     t_float * const D_ = reinterpret_cast<t_float *>(PyArray_DATA(D));
     cluster_result Z2(N-1);
-    auto_array_ptr<t_index> members;
-    // For these methods, the distance update formula needs the number of
-    // data points in a cluster.
-    if (method==METHOD_METR_AVERAGE ||
-        method==METHOD_METR_WARD ||
-        method==METHOD_METR_CENTROID) {
-      members.init(N, 1);
-    }
+    t_index * const members = reinterpret_cast<t_index *>(PyArray_DATA(members_));
     // Operate on squared distances for these methods.
     if (method==METHOD_METR_WARD ||
         method==METHOD_METR_CENTROID ||
