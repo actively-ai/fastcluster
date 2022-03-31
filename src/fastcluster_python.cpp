@@ -240,7 +240,7 @@ class GIL_release
 */
 
 static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
-  PyArrayObject * D, * Z, * members__;
+  PyArrayObject * D, * Z, * members_;
   long int N_ = 0;
   unsigned char method;
 
@@ -255,7 +255,7 @@ static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
                           &PyArray_Type, &D, // NumPy array
                           &PyArray_Type, &Z, // NumPy array
                           &method,           // unsigned char
-                          &PyArray_Type, &members__)) {  // NumPy array     
+                          &PyArray_Type, &members_)) {  // NumPy array     
       return NULL; // Error if the arguments have the wrong type.
     }
 #if HAVE_DIAGNOSTIC
@@ -294,12 +294,11 @@ static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
     GIL_release G;
 
     t_float * const D_ = reinterpret_cast<t_float *>(PyArray_DATA(D));
-    t_float * const members_ = reinterpret_cast<t_float *>(PyArray_DATA(members__));
     cluster_result Z2(N-1);
     auto_array_ptr<t_index> members;
     members.init(N);
     for (int i = 0; i < N; i++) {
-      members[i] = static_cast<int>(members_[i]);
+      members[i] = *reinterpret_cast<t_index*>(PyArray_GETPTR1(members_, i));
     }
     // Operate on squared distances for these methods.
     if (method==METHOD_METR_WARD ||
