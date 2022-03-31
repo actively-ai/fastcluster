@@ -295,7 +295,11 @@ static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
 
     t_float * const D_ = reinterpret_cast<t_float *>(PyArray_DATA(D));
     cluster_result Z2(N-1);
-    t_index * const members = reinterpret_cast<t_index *>(PyArray_DATA(members_));
+    auto_array_ptr<t_index> members;
+    members.init(N);
+    for (int i = 0; i < N; i++) {
+      members[i] = *reinterpret_cast<t_index*>(PyArray_GETPTR1(members_, i));
+    }
     // Operate on squared distances for these methods.
     if (method==METHOD_METR_WARD ||
         method==METHOD_METR_CENTROID ||

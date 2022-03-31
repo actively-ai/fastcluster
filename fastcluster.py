@@ -256,7 +256,7 @@ and simply ignores the mask.'''
         N = len(X)
         X = pdist(X, metric=metric)
         X = array(X, dtype=double, copy=False, order='C', subok=True)
-    members = ones(N, dtype=int32) if members is None else array(members, dtype=int32, copy=True, subok=True)
+    members = ones(N, dtype=int32) if members is None else array(members, dtype=int32, copy=False, subok=True)
     assert members.shape == (N,)
     Z = empty((N-1,4))
     if N > 1:
