@@ -298,7 +298,7 @@ static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
     auto_array_ptr<t_index> members;
     members.init(N);
     for (int i = 0; i < N; i++) {
-      members[i] = *reinterpret_cast<t_index*>(PyArray_GETPTR1(members_, i));
+      members[i] = static_cast<t_index>(*reinterpret_cast<int32_t *>(PyArray_GETPTR1(members_, i)));
     }
     // Operate on squared distances for these methods.
     if (method==METHOD_METR_WARD ||
