@@ -1,0 +1,23 @@
+name: NumPy compatibility
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  wheel:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]
+        numpy: ["1.26.4", "2.3.4"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install . "numpy==${{ matrix.numpy }}" "scipy==1.16.3"
+      # Import the installed wheel, not the source-tree Python wrapper.
+      - run: python -m unittest discover -p test_numpy_compat.py -v
+        working-directory: tests
